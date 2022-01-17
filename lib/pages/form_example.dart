@@ -20,6 +20,9 @@ class _FormExampleState extends State<FormExample> {
   final _passController = TextEditingController();
   final _confirmPassController = TextEditingController();
 
+  List<String> _countries = ['Russia', 'Ukraine', 'Germany', 'France'];
+  String? _selectedCountry;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -68,8 +71,7 @@ class _FormExampleState extends State<FormExample> {
                   ),
                 ),
               ),
-              validator: (String? val) =>
-                  val!.isEmpty ? 'Name is required' : null,
+              validator: _validateName,
             ),
             SizedBox(height: 10.0),
             TextFormField(
@@ -100,8 +102,12 @@ class _FormExampleState extends State<FormExample> {
               ),
               keyboardType: TextInputType.phone,
               inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
+                FilteringTextInputFormatter(RegExp(r'^[()\d -]{1,15}$'),
+                    allow: true),
               ],
+              validator: (value) => _validatePhoneNumber(value)
+                  ? null
+                  : 'Phone number have to be entered as (###)###-####',
             ),
             SizedBox(height: 10.0),
             TextFormField(
@@ -111,8 +117,33 @@ class _FormExampleState extends State<FormExample> {
                 hintText: 'Type your email address',
                 icon: Icon(Icons.email),
               ),
+              keyboardType: TextInputType.emailAddress,
+              validator: _validateEmail,
             ),
             SizedBox(height: 10.0),
+            DropdownButtonFormField(
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  icon: Icon(Icons.map),
+                  labelText: 'Country?'),
+              items: _countries.map((country) {
+                return DropdownMenuItem(
+                  child: Text(country),
+                  value: country,
+                );
+              }).toList(),
+              onChanged: (data) {
+                print(data);
+                setState(() {
+                  _selectedCountry = data.toString();
+                });
+              },
+              value: _selectedCountry,
+              validator: (val) {
+                return val == null ? 'Please select a country' : null;
+              },
+            ),
+            SizedBox(height: 20.0),
             TextFormField(
               controller: _storyController,
               decoration: InputDecoration(
@@ -145,7 +176,7 @@ class _FormExampleState extends State<FormExample> {
                 ),
                 icon: Icon(Icons.security),
               ),
-              keyboardType: TextInputType.emailAddress,
+              validator: _validatePassword,
             ),
             SizedBox(height: 10.0),
             TextFormField(
@@ -166,6 +197,7 @@ class _FormExampleState extends State<FormExample> {
                 ),
                 icon: Icon(Icons.border_color),
               ),
+              validator: _validatePassword,
             ),
             SizedBox(height: 30.0),
             Container(
@@ -193,11 +225,55 @@ class _FormExampleState extends State<FormExample> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      _formKey.currentState?.save();
+
+      //---------- IT CAN BE DELETED, IT'S JUST FOR DEBUG -------------
       print('Form is valid');
       print('Name: ${_nameController.text}');
-      print('Name: ${_phoneController.text}');
-      print('Name: ${_emailController.text}');
-      print('Name: ${_storyController.text}');
+      print('Phone: ${_phoneController.text}');
+      print('Email: ${_emailController.text}');
+      print('Country: $_selectedCountry');
+      print('Story: ${_storyController.text}');
+      //----------------------------------------------------------------
+    } else {
+      print('Form is not valid! Please review and correct');
+    }
+  }
+
+  String? _validateName(String? value) {
+    final _nameExp = RegExp(r'^[A-Za-z ]+$');
+
+    if (value!.isEmpty) {
+      return 'Name is required';
+    } else if (!_nameExp.hasMatch(value)) {
+      return 'Please enter alphabetical characters';
+    } else {
+      return null;
+    }
+  }
+
+  bool _validatePhoneNumber(String? input) {
+    final _phoneExp = RegExp(r'^\(\d\d\d\)\d\d\d\-\d\d\d\d$');
+    return _phoneExp.hasMatch(input!);
+  }
+
+  String? _validateEmail(String? value) {
+    if (value!.isEmpty) {
+      return 'Email cannot be empty';
+    } else if (!_emailController.text.contains('@')) {
+      return 'Invalid email address';
+    } else {
+      return null;
+    }
+  }
+
+  String? _validatePassword(String? value) {
+    if (_passController.text.length != 8) {
+      return '8 characters required for password';
+    } else if (_confirmPassController.text != _passController.text) {
+      return 'Password does not match';
+    } else {
+      return null;
     }
   }
 }

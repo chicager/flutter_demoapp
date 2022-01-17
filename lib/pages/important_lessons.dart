@@ -70,6 +70,11 @@ Widget _myListView() {
         title: Text('Передача данных на предыдущий экран'),
         subtitle: Text('Kokorin'),
       ),
+      ListTile(
+        leading: Text('40'),
+        title: Text('Валидация формы'),
+        subtitle: Text('Kokorin'),
+      ),
     ],
   );
 }
