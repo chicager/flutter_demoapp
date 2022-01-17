@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/model/user.dart';
+import 'package:flutter_application_1/pages/user_info_page.dart';
 
 class FormExample extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class _FormExampleState extends State<FormExample> {
   bool _confirmPass = true;
 
   final _formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -23,6 +26,12 @@ class _FormExampleState extends State<FormExample> {
   List<String> _countries = ['Russia', 'Ukraine', 'Germany', 'France'];
   String? _selectedCountry;
 
+  final _nameFocus = FocusNode();
+  final _phoneFocus = FocusNode();
+  final _passFocus = FocusNode();
+
+  User newUser = User();
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -31,12 +40,23 @@ class _FormExampleState extends State<FormExample> {
     _storyController.dispose();
     _passController.dispose();
     _confirmPassController.dispose();
+    _nameFocus.dispose();
+    _phoneFocus.dispose();
+    _passFocus.dispose();
     super.dispose();
+  }
+
+  //change focus of fields
+  void _fieldFocusChange(
+      BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
+    currentFocus.unfocus();
+    FocusScope.of(context).requestFocus(nextFocus);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Form Example'),
         centerTitle: true,
@@ -47,14 +67,24 @@ class _FormExampleState extends State<FormExample> {
           padding: EdgeInsets.all(16.0),
           children: <Widget>[
             TextFormField(
+              focusNode: _nameFocus,
+              autofocus: true,
+              onFieldSubmitted: (_) {
+                _fieldFocusChange(context, _nameFocus, _phoneFocus);
+              },
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Full Name *',
                 hintText: 'Type your full name',
                 prefixIcon: Icon(Icons.person),
-                suffixIcon: Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    _nameController.clear();
+                  },
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -72,18 +102,28 @@ class _FormExampleState extends State<FormExample> {
                 ),
               ),
               validator: _validateName,
+              onSaved: (value) => newUser.name = value,
             ),
             SizedBox(height: 10.0),
             TextFormField(
+              focusNode: _phoneFocus,
+              onFieldSubmitted: (_) {
+                _fieldFocusChange(context, _phoneFocus, _passFocus);
+              },
               controller: _phoneController,
               decoration: InputDecoration(
                 labelText: 'Phone Number *',
                 hintText: 'Type your phone number',
                 helperText: 'Phone format: (XXX)XXX-XXXX',
                 prefixIcon: Icon(Icons.call),
-                suffixIcon: Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    _phoneController.clear();
+                  },
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -108,6 +148,7 @@ class _FormExampleState extends State<FormExample> {
               validator: (value) => _validatePhoneNumber(value)
                   ? null
                   : 'Phone number have to be entered as (###)###-####',
+              onSaved: (value) => newUser.phone = value,
             ),
             SizedBox(height: 10.0),
             TextFormField(
@@ -119,6 +160,7 @@ class _FormExampleState extends State<FormExample> {
               ),
               keyboardType: TextInputType.emailAddress,
               validator: _validateEmail,
+              onSaved: (value) => newUser.email = value,
             ),
             SizedBox(height: 10.0),
             DropdownButtonFormField(
@@ -132,10 +174,11 @@ class _FormExampleState extends State<FormExample> {
                   value: country,
                 );
               }).toList(),
-              onChanged: (data) {
-                print(data);
+              onChanged: (country) {
+                print(country);
                 setState(() {
-                  _selectedCountry = data.toString();
+                  _selectedCountry = country.toString();
+                  newUser.country = country.toString();
                 });
               },
               value: _selectedCountry,
@@ -156,9 +199,11 @@ class _FormExampleState extends State<FormExample> {
               inputFormatters: [
                 LengthLimitingTextInputFormatter(100),
               ],
+              onSaved: (value) => newUser.story = value,
             ),
             SizedBox(height: 10.0),
             TextFormField(
+              focusNode: _passFocus,
               controller: _passController,
               obscureText: _hidePass,
               maxLength: 8,
@@ -226,6 +271,7 @@ class _FormExampleState extends State<FormExample> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
+      _showDialog(name: _nameController.text);
 
       //---------- IT CAN BE DELETED, IT'S JUST FOR DEBUG -------------
       print('Form is valid');
@@ -236,7 +282,7 @@ class _FormExampleState extends State<FormExample> {
       print('Story: ${_storyController.text}');
       //----------------------------------------------------------------
     } else {
-      print('Form is not valid! Please review and correct');
+      _showMessage(message: 'Form is not valid! Please review and correct');
     }
   }
 
@@ -275,5 +321,62 @@ class _FormExampleState extends State<FormExample> {
     } else {
       return null;
     }
+  }
+
+  //show snackbar at the bottom (red) that form isn't valid
+  void _showMessage({String? message}) {
+    _scaffoldKey.currentState!.showSnackBar(SnackBar(
+      backgroundColor: Colors.red,
+      content: Text(
+        message.toString(),
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w600,
+          fontSize: 18.0,
+        ),
+      ),
+    ));
+  }
+
+  //show dialog that registration is successful
+  void _showDialog({String? name}) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              'Registration successful',
+              style: TextStyle(
+                color: Colors.green,
+              ),
+            ),
+            content: Text(
+              '$name verified a register form',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 18.0,
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => UserInfoPage(
+                        userInfo: newUser,
+                      )),
+                    );
+                  },
+                  child: Text(
+                    'Verified',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 18.0,
+                    ),
+                  ))
+            ],
+          );
+        });
   }
 }
