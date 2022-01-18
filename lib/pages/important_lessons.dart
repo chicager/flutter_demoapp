@@ -75,6 +75,16 @@ Widget _myListView() {
         title: Text('Валидация формы'),
         subtitle: Text('Kokorin'),
       ),
+      ListTile(
+        leading: Text('51'),
+        title: Text('Пример http response'),
+        subtitle: Text('Kokorin'),
+      ),
+      ListTile(
+        leading: Text('54'),
+        title: Text('Пример ручной сериализации json'),
+        subtitle: Text('Kokorin'),
+      ),
     ],
   );
 }

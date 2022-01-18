@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ScreenExample extends StatefulWidget {
   @override
@@ -63,10 +64,21 @@ Widget _buildBody() {
   );
 }
 
-Image _headerImage() {
-  return Image(
-    image: NetworkImage("https://wallpaperaccess.com/full/1614308.jpg"),
-    fit: BoxFit.cover,
+Widget _headerImage() {
+  return Stack(
+    children: <Widget>[
+      const Center(child: Padding(
+        padding: EdgeInsets.only(top: 112.0, bottom: 112.0),
+        child: CircularProgressIndicator(),
+      ),),
+      Center(
+        child: FadeInImage.memoryNetwork(
+          fit: BoxFit.cover,
+          placeholder: kTransparentImage,
+          image: 'https://wallpaperaccess.com/full/1614308.jpg',
+        ),
+      ),
+    ],
   );
 }
 
