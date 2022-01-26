@@ -6,7 +6,9 @@ import 'package:flutter_application_1/pages/counter_example.dart';
 import 'package:flutter_application_1/pages/form_example.dart';
 import 'package:flutter_application_1/pages/http_example.dart';
 import 'package:flutter_application_1/pages/important_lessons.dart';
+import 'package:flutter_application_1/pages/inheritedwidget_example.dart';
 import 'package:flutter_application_1/pages/rating_example.dart';
+import 'package:flutter_application_1/pages/scopedmodel_example.dart';
 import 'package:flutter_application_1/pages/screen_example.dart';
 
 class Contents extends StatefulWidget {
@@ -173,6 +175,42 @@ Widget _myListView(BuildContext context) {
         },
         child: Text(
           'Rating Example',
+          style: TextStyle(
+            fontSize: 24,
+          ),
+        ),
+      ),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: Colors.red[600], // background
+          onPrimary: Colors.white, // foreground
+          padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+        ),
+        onPressed: () {
+          Route route =
+              MaterialPageRoute(builder: (context) => InheritedWidgetExample());
+          Navigator.push(context, route);
+        },
+        child: Text(
+          'InheritedWidget Example',
+          style: TextStyle(
+            fontSize: 24,
+          ),
+        ),
+      ),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: Colors.red[600], // background
+          onPrimary: Colors.white, // foreground
+          padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+        ),
+        onPressed: () {
+          Route route =
+              MaterialPageRoute(builder: (context) => ScopedModelExample());
+          Navigator.push(context, route);
+        },
+        child: Text(
+          'ScopedModel Example',
           style: TextStyle(
             fontSize: 24,
           ),

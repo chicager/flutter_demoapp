@@ -85,6 +85,16 @@ Widget _myListView() {
         title: Text('Пример ручной сериализации json'),
         subtitle: Text('Kokorin'),
       ),
+      ListTile(
+        leading: Text('58'),
+        title: Text('Объеснение создания InheritedWidget'),
+        subtitle: Text('Kokorin'),
+      ),
+      ListTile(
+        leading: Text('59'),
+        title: Text('Объеснение создания Scoped Model'),
+        subtitle: Text('Kokorin'),
+      ),
     ],
   );
 }
